@@ -1,7 +1,11 @@
 import { api } from './api';
 import { Registration, Address } from '@/src/types/registration';
 
+
+
 export class RegistrationService {
+
+// optei por usar classe por agrupar semanticamente e ser mais legivel
   static async create(): Promise<Registration> {
     const { data } = await api.post<Registration>('/registration');
     return data;
@@ -11,6 +15,7 @@ export class RegistrationService {
     id: string,
     payload: { name: string; email: string },
   ): Promise<Registration> {
+    // rota para criar um novo rascunho ou novo registro (id)
     const { data } = await api.patch<Registration>(
       `/registration/${id}/contact`,
       payload,

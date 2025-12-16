@@ -1,17 +1,17 @@
 import { api } from './api';
-import { Registration, Address } from '@/src/types/registration';
+import { Registration, Address } from '@/types/registration';
 
 
 
-export class RegistrationService {
+class RegistrationService {
 
 // optei por usar classe por agrupar semanticamente e ser mais legivel
-  static async create(): Promise<Registration> {
+  async create(): Promise<Registration> {
     const { data } = await api.post<Registration>('/registration');
     return data;
   }
 
-  static async updateIdentification(
+  async updateIdentification(
     id: string,
     payload: { name: string; email: string },
   ): Promise<Registration> {
@@ -23,7 +23,7 @@ export class RegistrationService {
     return data;
   }
 
-  static async updateDocument(
+  async updateDocument(
     id: string,
     payload: { document: string },
   ): Promise<Registration> {
@@ -34,7 +34,7 @@ export class RegistrationService {
     return data;
   }
 
-  static async updatePhone(
+  async updatePhone(
     id: string,
     payload: { phone: string },
   ): Promise<Registration> {
@@ -45,7 +45,7 @@ export class RegistrationService {
     return data;
   }
 
-  static async updateAddress(
+  async updateAddress(
     id: string,
     payload: Address,
   ): Promise<Registration> {
@@ -56,10 +56,18 @@ export class RegistrationService {
     return data;
   }
 
-  static async finish(id: string): Promise<{ message: string }> {
+  async finish(id: string): Promise<{ message: string }> {
     const { data } = await api.patch<{ message: string }>(
       `/registration/${id}/finish`,
     );
     return data;
   }
+
+  async findById(id: string): Promise<Registration> {
+    const { data } = await api.get<Registration>(`/registration/${id}`);
+    return data;
+  }
+  
 }
+
+export const registrationService = new RegistrationService();

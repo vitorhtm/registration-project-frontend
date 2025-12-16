@@ -7,14 +7,18 @@ import {
   useState,
   ReactNode,
 } from 'react';
-import { RegistrationService } from '@/src/services/registration.service';
+import { registrationService } from '@/services/registration.service';
 
-type RegistrationContextData = {
+
+interface RegistrationContextData {
   registrationId: string | null;
   currentStep: number;
-  setCurrentStep: (step: number) => void;
   initializeRegistration: () => Promise<void>;
-};
+  goToNextStep: () => void;
+  setCurrentStep: (step: number) => void;
+  resetRegistration: () => void;
+}
+
 
 const RegistrationContext = createContext<RegistrationContextData | undefined>(
   undefined,
@@ -23,6 +27,18 @@ const RegistrationContext = createContext<RegistrationContextData | undefined>(
 export function RegistrationProvider({ children }: { children: ReactNode }) {
   const [registrationId, setRegistrationId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
+
+  function goToNextStep() {
+    setCurrentStep((prev) => prev + 1);
+  }
+
+  function resetRegistration() {
+    setRegistrationId(null);
+    setCurrentStep(0);
+  
+    localStorage.removeItem('registrationId');
+    localStorage.removeItem('registrationStep');
+  }
 
   // Recupera estado salvo
   useEffect(() => {
@@ -35,17 +51,17 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
 
   // Persiste estado
   useEffect(() => {
-    if (registrationId) {
+    if (registrationId !== null) {
       localStorage.setItem('registrationId', registrationId);
+      localStorage.setItem('registrationStep', String(currentStep));
     }
-    localStorage.setItem('registrationStep', String(currentStep));
   }, [registrationId, currentStep]);
 
   // Cria ou recupera rascunho
   async function initializeRegistration() {
     if (registrationId) return;
 
-    const registration = await RegistrationService.create();
+    const registration = await registrationService.create();
     setRegistrationId(registration.id);
   }
 
@@ -56,6 +72,8 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
         currentStep,
         setCurrentStep,
         initializeRegistration,
+        goToNextStep,
+        resetRegistration,
       }}
     >
       {children}
@@ -63,12 +81,13 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useRegistration() {
+
+export function useRegistration(): RegistrationContextData {
   const context = useContext(RegistrationContext);
 
   if (!context) {
     throw new Error(
-      'useRegistration must be used within a RegistrationProvider',
+      'useRegistration must be used within a RegistrationProvider'
     );
   }
 

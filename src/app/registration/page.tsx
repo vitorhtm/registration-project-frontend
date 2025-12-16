@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRegistration } from '@/src/stores/registration.store';
-import { RegistrationStepper } from '@/src/components/stepper/RegistrationStepper';
+import { useRegistration } from '@/stores/registration.store';
+import { RegistrationStepper } from '@/components/stepper/RegistrationStepper';
+import { StepRenderer } from '@/components/registration/StepRenderer';
+
 
 
 export default function RegistrationPage() {
@@ -17,8 +19,7 @@ export default function RegistrationPage() {
 
         <h1>Cadastro</h1>
         <RegistrationStepper />
-
-        <p>Etapa atual: {currentStep + 1}</p>
+        <StepRenderer />
     </main>
   );
 }

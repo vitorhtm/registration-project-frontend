@@ -1,6 +1,6 @@
 'use client';
 
-import { useRegistration } from '@/src/stores/registration.store';
+import { useRegistration } from '@/stores/registration.store';
 
 const steps = [
   'Identificação',

@@ -1,4 +1,4 @@
-import { RegistrationProvider } from '@/src/stores/registration.store';
+import { RegistrationProvider } from '@/stores/registration.store';
 
 export default function RootLayout({
   children,

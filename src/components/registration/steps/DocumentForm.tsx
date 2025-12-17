@@ -45,10 +45,15 @@ export function DocumentForm() {
 
   return (
     <StepContainer
+    
       title="Documento"
       description="Informe seu CPF ou CNPJ."
     >
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}
+       style={{
+        width: '100%',
+        maxWidth: '400px', /* Limita a largura máxima */
+      }}>
         <Input
           label="CPF ou CNPJ"
           placeholder="Digite apenas números"

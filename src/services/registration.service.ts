@@ -2,15 +2,12 @@ import { api } from './api';
 import { Registration, Address } from '@/types/registration';
 
 class RegistrationService {
-  // Cria um novo registro já com dados de identificação
   async create(payload: { name: string; email: string }): Promise<Registration> {
-
     console.log('aaaa', payload)
     const { data } = await api.post<Registration>('/registration', payload);
     return data;
   }
 
-  // Atualiza a identificação se o registro já existir
   async updateIdentification(
     id: string,
     payload: { name: string; email: string },

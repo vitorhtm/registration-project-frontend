@@ -1,21 +1,24 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRegistration } from '@/stores/registration.store';
 import { RegistrationStepper } from '@/components/stepper/RegistrationStepper';
 import { StepRenderer } from '@/components/registration/StepRenderer';
-
-
+import './page.css';
 
 export default function RegistrationPage() {
-  const { initializeRegistration, currentStep } = useRegistration();
+  const { currentStep } = useRegistration();
 
   return (
-    <main style={{ padding: 16 }}>
+    <div className="page">
+      <div className="card">
+        <h1 className="title">Cadastro</h1>
 
-        <h1>Cadastro</h1>
         <RegistrationStepper />
-        <StepRenderer step={currentStep} />
-    </main>
+
+        <div className="content">
+          <StepRenderer step={currentStep} />
+        </div>
+      </div>
+    </div>
   );
 }

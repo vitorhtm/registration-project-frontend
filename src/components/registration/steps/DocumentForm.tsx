@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import { useRegistration } from '@/stores/registration.store';
 import { registrationService } from '@/services/registration.service';
+import { StepContainer } from '@/components/ui/StepContainer';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { cpf, cnpj } from 'cpf-cnpj-validator';
 
 export function DocumentForm() {
   const { registrationId, goToNextStep } = useRegistration();
@@ -10,17 +14,27 @@ export function DocumentForm() {
   const [document, setDocument] = useState('');
   const [loading, setLoading] = useState(false);
 
-  function onlyNumbers(value: string) {
+  function clean(value: string) {
     return value.replace(/\D/g, '');
   }
 
+  function isValidDocument(value: string) {
+    const cleaned = clean(value);
+    return cpf.isValid(cleaned) || cnpj.isValid(cleaned);
+  }
+
+  const invalid = document.length > 0 && !isValidDocument(document);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (invalid || !registrationId) return;
+
     setLoading(true);
 
     try {
-      await registrationService.updateDocument(registrationId!, {
-        document: onlyNumbers(document),
+      await registrationService.updateDocument(registrationId, {
+        document: clean(document),
       });
 
       goToNextStep();
@@ -30,22 +44,33 @@ export function DocumentForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Documento</h2>
-
-      <div>
-        <label>CPF ou CNPJ</label>
-        <input
+    <StepContainer
+      title="Documento"
+      description="Informe seu CPF ou CNPJ."
+    >
+      <form onSubmit={handleSubmit}>
+        <Input
+          label="CPF ou CNPJ"
+          placeholder="Digite apenas números"
           value={document}
           onChange={(e) => setDocument(e.target.value)}
-          placeholder="Digite CPF ou CNPJ"
           required
         />
-      </div>
 
-      <button type="submit" disabled={loading}>
-        {loading ? 'Salvando...' : 'Próximo'}
-      </button>
-    </form>
+        {invalid && (
+          <p style={{ color: 'red', marginTop: 8 }}>
+            CPF ou CNPJ inválido
+          </p>
+        )}
+
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={loading || invalid}
+        >
+          {loading ? 'Salvando...' : 'Próximo'}
+        </Button>
+      </form>
+    </StepContainer>
   );
 }

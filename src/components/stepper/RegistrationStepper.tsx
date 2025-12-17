@@ -1,5 +1,3 @@
-'use client';
-
 import { useRegistration } from '@/stores/registration.store';
 
 const steps = [
@@ -14,21 +12,39 @@ export function RegistrationStepper() {
   const { currentStep } = useRegistration();
 
   return (
-    <ol style={{ listStyle: 'none', padding: 0 }}>
-      {steps.map((label, index) => (
-        <li
-          key={label}
-          style={{
-            padding: '12px 8px',
-            marginBottom: 8,
-            borderLeft:
-              index === currentStep ? '4px solid #1677ff' : '4px solid #ddd',
-            background: index === currentStep ? '#f0f5ff' : '#fafafa',
-          }}
-        >
-          <strong>{index + 1}.</strong> {label}
-        </li>
-      ))}
-    </ol>
+    <div
+      style={{
+        display: 'flex',
+        gap: 8,
+        marginBottom: 24,
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+      }}
+    >
+      {steps.map((label, index) => {
+        const active = index === currentStep;
+        const completed = index < currentStep;
+
+        return (
+          <div
+            key={label}
+            style={{
+              padding: '6px 10px',
+              borderRadius: 20,
+              fontSize: 12,
+              backgroundColor: completed
+                ? '#16a34a'
+                : active
+                ? '#111'
+                : '#e5e5e5',
+              color:
+                completed || active ? '#fff' : '#111',
+            }}
+          >
+            {label}
+          </div>
+        );
+      })}
+    </div>
   );
 }

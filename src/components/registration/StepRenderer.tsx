@@ -5,6 +5,7 @@ import { DocumentForm } from './steps/DocumentForm';
 import { ContactForm } from './steps/ContactForm';
 import { AddressForm } from './steps/AddressForm';
 import { ReviewForm } from './steps/ReviewForm';
+import { SuccessForm } from './steps/SuccessForm';
 
 interface StepRendererProps {
   step: number;
@@ -17,6 +18,8 @@ export function StepRenderer({ step }: StepRendererProps) {
     case 2: return <ContactForm />;
     case 3: return <AddressForm />;
     case 4: return <ReviewForm />;
-    default: return null;
+    case 5: return <SuccessForm />;
+    default:
+      return null;
   }
 }

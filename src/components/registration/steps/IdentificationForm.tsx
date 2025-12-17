@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { useRegistration } from '@/stores/registration.store';
 import { registrationService } from '@/services/registration.service';
+import { StepContainer } from '@/components/ui/StepContainer';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 export function IdentificationForm() {
   const { registrationId, setRegistrationId, setCurrentStep, currentStep } = useRegistration();
@@ -16,19 +19,14 @@ export function IdentificationForm() {
     setLoading(true);
 
     try {
-      let registration;
-
       if (!registrationId) {
         const registration = await registrationService.create({ name, email });
-        if (registration?.id) {
-          setRegistrationId(registration.id); // só seta se existir ID válido
-        }
+        if (registration?.id) setRegistrationId(registration.id);
       } else {
         await registrationService.updateIdentification(registrationId, { name, email });
       }
 
       setCurrentStep(currentStep + 1);
-
     } catch (err) {
       console.error('Erro ao salvar identificação:', err);
     } finally {
@@ -37,31 +35,29 @@ export function IdentificationForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Identificação</h2>
-
-      <div>
-        <label>Nome</label>
-        <input
+    <StepContainer title="Identificação" description="Preencha seu nome e e-mail para continuar.">
+      <form onSubmit={handleSubmit}>
+        <Input
+          label="Nome"
+          placeholder="Digite seu nome completo"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
         />
-      </div>
 
-      <div>
-        <label>Email</label>
-        <input
+        <Input
+          label="E-mail"
           type="email"
+          placeholder="seu@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-      </div>
 
-      <button type="submit" disabled={loading}>
-        {loading ? 'Salvando...' : 'Próximo'}
-      </button>
-    </form>
+        <Button type="submit" variant="primary" disabled={loading}>
+          {loading ? 'Salvando...' : 'Próximo'}
+        </Button>
+      </form>
+    </StepContainer>
   );
 }

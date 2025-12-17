@@ -1,6 +1,12 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useRegistration } from '@/stores/registration.store';
 import { registrationService } from '@/services/registration.service';
+import { StepContainer } from '@/components/ui/StepContainer';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import axios from 'axios';
 
 export function AddressForm() {
   const { registrationId, goToNextStep } = useRegistration();
@@ -14,28 +20,45 @@ export function AddressForm() {
   const [state, setState] = useState('');
   const [loading, setLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError] = useState<string | null>(null);
+
 
   async function fetchAddress(cep: string) {
     try {
       setCepLoading(true);
+      setCepError(null);
+
       const address = await registrationService.getAddressByCep(cep);
 
-      console.log(address)
       setStreet(address.street || '');
       setNeighborhood(address.neighborhood || '');
       setCity(address.city || '');
       setState(address.state || '');
-    } catch (error) {
-      console.error('Erro ao buscar CEP', error);
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        setCepError(
+          error.response?.data?.message || 'Erro ao buscar CEP'
+        );
+      } else {
+        setCepError('Erro inesperado ao buscar CEP');
+      }
+
+      // limpa os campos se der erro
+      setStreet('');
+      setNeighborhood('');
+      setCity('');
+      setState('');
     } finally {
       setCepLoading(false);
     }
   }
 
   useEffect(() => {
-    const cleanedCep = cep.replace(/\D/g, '');
-    if (cleanedCep.length === 8) {
-      fetchAddress(cleanedCep);
+    const cleanCep = cep.replace(/\D/g, '');
+    if (cleanCep.length === 8) {
+      fetchAddress(cleanCep);
+    } else {
+      setCepError(null);
     }
   }, [cep]);
 
@@ -45,7 +68,7 @@ export function AddressForm() {
 
     try {
       await registrationService.updateAddress(registrationId!, {
-        cep,
+        cep: cep.replace(/\D/g, ''),
         street,
         number,
         complement,
@@ -60,53 +83,87 @@ export function AddressForm() {
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <h2>Endereço</h2>
+  const canSubmit =
+    !loading &&
+    !cepLoading &&
+    !cepError &&
+    cep.replace(/\D/g, '').length === 8;
 
-      <div>
-        <label>CEP</label>
-        <input
-          value={cep}
-          onChange={(e) => setCep(e.target.value)}
+
+  return (
+    <StepContainer
+      title="Endereço"
+      description="Informe seu endereço residencial."
+    >
+      <form onSubmit={handleSubmit}>
+        <div>
+          <Input
+            label="CEP"
+            value={cep}
+            onChange={(e) => setCep(e.target.value)}
+            required
+            inputMode="numeric"
+            maxLength={9}
+          />
+
+          {cepLoading && (
+            <p style={{ fontSize: 14, marginTop: 4 }}>
+              Buscando endereço...
+            </p>
+          )}
+
+          {cepError && (
+            <p style={{ color: 'red', fontSize: 14, marginTop: 4 }}>
+              {cepError}
+            </p>
+          )}
+        </div>
+
+
+        <Input
+          label="Rua"
+          value={street}
+          onChange={(e) => setStreet(e.target.value)}
           required
         />
-        {cepLoading && <p>Buscando endereço...</p>}
-      </div>
 
-      <div>
-        <label>Rua</label>
-        <input value={street} onChange={(e) => setStreet(e.target.value)} required />
-      </div>
+        <Input
+          label="Número"
+          value={number}
+          onChange={(e) => setNumber(e.target.value)}
+        />
 
-      <div>
-        <label>Número</label>
-        <input value={number} onChange={(e) => setNumber(e.target.value)} />
-      </div>
+        <Input
+          label="Complemento"
+          value={complement}
+          onChange={(e) => setComplement(e.target.value)}
+        />
 
-      <div>
-        <label>Complemento</label>
-        <input value={complement} onChange={(e) => setComplement(e.target.value)} />
-      </div>
+        <Input
+          label="Bairro"
+          value={neighborhood}
+          onChange={(e) => setNeighborhood(e.target.value)}
+          required
+        />
 
-      <div>
-        <label>Bairro</label>
-        <input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} required />
-      </div>
+        <Input
+          label="Cidade"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          required
+        />
 
-      <div>
-        <label>Cidade</label>
-        <input value={city} onChange={(e) => setCity(e.target.value)} required />
-      </div>
+        <Input
+          label="Estado"
+          value={state}
+          onChange={(e) => setState(e.target.value)}
+          required
+        />
 
-      <div>
-        <label>Estado</label>
-        <input value={state} onChange={(e) => setState(e.target.value)} required />
-      </div>
-
-      <button type="submit" disabled={loading}>
-        {loading ? 'Salvando...' : 'Próximo'}
-      </button>
-    </form>
+        <Button type="submit" disabled={!canSubmit}>
+          {loading ? 'Salvando...' : 'Próximo'}
+        </Button>
+      </form>
+    </StepContainer>
   );
 }

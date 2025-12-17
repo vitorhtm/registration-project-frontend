@@ -1,6 +1,4 @@
-'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRegistration } from '@/stores/registration.store';
 import { registrationService } from '@/services/registration.service';
 
@@ -15,6 +13,31 @@ export function AddressForm() {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [loading, setLoading] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
+
+  async function fetchAddress(cep: string) {
+    try {
+      setCepLoading(true);
+      const address = await registrationService.getAddressByCep(cep);
+
+      console.log(address)
+      setStreet(address.street || '');
+      setNeighborhood(address.neighborhood || '');
+      setCity(address.city || '');
+      setState(address.state || '');
+    } catch (error) {
+      console.error('Erro ao buscar CEP', error);
+    } finally {
+      setCepLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    const cleanedCep = cep.replace(/\D/g, '');
+    if (cleanedCep.length === 8) {
+      fetchAddress(cleanedCep);
+    }
+  }, [cep]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,60 +66,42 @@ export function AddressForm() {
 
       <div>
         <label>CEP</label>
-        <input value={cep} onChange={(e) => setCep(e.target.value)} required />
+        <input
+          value={cep}
+          onChange={(e) => setCep(e.target.value)}
+          required
+        />
+        {cepLoading && <p>Buscando endereço...</p>}
       </div>
 
       <div>
         <label>Rua</label>
-        <input
-          value={street}
-          onChange={(e) => setStreet(e.target.value)}
-          required
-        />
+        <input value={street} onChange={(e) => setStreet(e.target.value)} required />
       </div>
 
       <div>
         <label>Número</label>
-        <input
-          value={number}
-          onChange={(e) => setNumber(e.target.value)}
-          required
-        />
+        <input value={number} onChange={(e) => setNumber(e.target.value)} />
       </div>
 
       <div>
         <label>Complemento</label>
-        <input
-          value={complement}
-          onChange={(e) => setComplement(e.target.value)}
-        />
+        <input value={complement} onChange={(e) => setComplement(e.target.value)} />
       </div>
 
       <div>
         <label>Bairro</label>
-        <input
-          value={neighborhood}
-          onChange={(e) => setNeighborhood(e.target.value)}
-          required
-        />
+        <input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} required />
       </div>
 
       <div>
         <label>Cidade</label>
-        <input
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          required
-        />
+        <input value={city} onChange={(e) => setCity(e.target.value)} required />
       </div>
 
       <div>
         <label>Estado</label>
-        <input
-          value={state}
-          onChange={(e) => setState(e.target.value)}
-          required
-        />
+        <input value={state} onChange={(e) => setState(e.target.value)} required />
       </div>
 
       <button type="submit" disabled={loading}>
